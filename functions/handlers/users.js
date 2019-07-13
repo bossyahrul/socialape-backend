@@ -121,22 +121,21 @@ exports.getAuthenticatedUser = (req, res) => {
       }
     })
     .then(data => {
+      console.log(data.size);
       userData.likes = [];
       data.forEach(doc => {
         userData.likes.push(doc.data());
       });
       return db
         .collection("notifications")
-        .where("recipient", "==", "user")
+        .where("recipient", "==", req.user.handle)
         .orderBy("createdAt", "desc")
         .limit(10)
         .get();
     })
     .then(data => {
       userData.notifications = [];
-      let i = 0;
       data.forEach(doc => {
-        i++;
         userData.notifications.push({
           recipient: doc.data().recipient,
           sender: doc.data().sender,
@@ -147,7 +146,6 @@ exports.getAuthenticatedUser = (req, res) => {
           notificationId: doc.id
         });
       });
-      console.log(i);
       return res.json(userData);
     })
     .catch(err => {
